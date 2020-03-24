@@ -24,30 +24,35 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="if you want to take credit, first learn to take reponsibility.">
-<meta property="og:type" content="website">
-<meta property="og:title" content="北叹荒歌">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="具体步骤1.数据处理数据介绍首先准备自及欲分类的数据集。本文中我使用的是自己采集的数据集&lt;车架号拓片&gt;，该数据集包括数字10类，字母19类。 数据转换将datasets转换为tfrecord格式（这里说明一下，注意有时转换出的数据集可能会是0字节，需要重新转换。）文件格式：—img——文件夹0———xxx.jpg——文件夹1———xxx.jpg. . . . . .——文件夹29———">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于VGG-16训练自己的数据集进行图像分类">
+<meta property="og:url" content="http://yoursite.com/2020/03/24/%E5%9F%BA%E4%BA%8EVGG-16%E8%AE%AD%E7%BB%83%E8%87%AA%E5%B7%B1%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%9B%E8%A1%8C%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/index.html">
 <meta property="og:site_name" content="北叹荒歌">
-<meta property="og:description" content="if you want to take credit, first learn to take reponsibility.">
+<meta property="og:description" content="具体步骤1.数据处理数据介绍首先准备自及欲分类的数据集。本文中我使用的是自己采集的数据集&lt;车架号拓片&gt;，该数据集包括数字10类，字母19类。 数据转换将datasets转换为tfrecord格式（这里说明一下，注意有时转换出的数据集可能会是0字节，需要重新转换。）文件格式：—img——文件夹0———xxx.jpg——文件夹1———xxx.jpg. . . . . .——文件夹29———">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190816085014243.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20190816102311170.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-03-24T06:12:58.657Z">
+<meta property="article:modified_time" content="2020-03-24T06:13:05.807Z">
 <meta property="article:author" content="Bruce">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190816085014243.png">
 
-<link rel="canonical" href="http://yoursite.com/">
+<link rel="canonical" href="http://yoursite.com/2020/03/24/%E5%9F%BA%E4%BA%8EVGG-16%E8%AE%AD%E7%BB%83%E8%87%AA%E5%B7%B1%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%9B%E8%A1%8C%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>北叹荒歌</title>
+  <title>基于VGG-16训练自己的数据集进行图像分类 | 北叹荒歌</title>
   
 
 
@@ -182,11 +187,11 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
         <div class="content-wrap">
           
 
-          <div class="content index">
+          <div class="content post">
             
 
   <div class="posts-expand">
-        
+      
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -202,10 +207,9 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
       <meta itemprop="name" content="北叹荒歌">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/24/%E5%9F%BA%E4%BA%8EVGG-16%E8%AE%AD%E7%BB%83%E8%87%AA%E5%B7%B1%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%9B%E8%A1%8C%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB/" class="post-title-link" itemprop="url">基于VGG-16训练自己的数据集进行图像分类</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          基于VGG-16训练自己的数据集进行图像分类<a href="https://github.com/user-name/repo-name/tree/branch-name/subdirectory-name_posts/%E5%9F%BA%E4%BA%8EVGG-16%E8%AE%AD%E7%BB%83%E8%87%AA%E5%B7%B1%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%9B%E8%A1%8C%E5%9B%BE%E5%83%8F%E5%88%86%E7%B1%BB.md" class="post-edit-link" title="编辑" rel="noopener" target="_blank"><i class="fa fa-pencil"></i></a>
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -226,6 +230,13 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
               <span class="post-meta-item-text">阅读次数：</span>
               <span class="firestore-visitors-count"></span>
             </span>
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
 
         </div>
       </header>
@@ -236,7 +247,7 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h1><h2 id="1-数据处理"><a href="#1-数据处理" class="headerlink" title="1.数据处理"></a>1.数据处理</h2><pre><code>数据介绍</code></pre><p>首先准备自及欲分类的数据集。本文中我使用的是自己采集的数据集&lt;<strong>车架号拓片</strong>&gt;，该数据集包括<strong>数字10类</strong>，<strong>字母19类</strong>。</p>
+        <h1 id="具体步骤"><a href="#具体步骤" class="headerlink" title="具体步骤"></a>具体步骤</h1><h2 id="1-数据处理"><a href="#1-数据处理" class="headerlink" title="1.数据处理"></a>1.数据处理</h2><pre><code>数据介绍</code></pre><p>首先准备自及欲分类的数据集。本文中我使用的是自己采集的数据集&lt;<strong>车架号拓片</strong>&gt;，该数据集包括<strong>数字10类</strong>，<strong>字母19类</strong>。</p>
 <pre><code>数据转换</code></pre><p>将datasets转换为tfrecord格式（这里说明一下，注意有时转换出的数据集可能会是0字节，需要重新转换。）<br>文件格式：<br>—img<br>——文件夹0<br>———xxx.jpg<br>——文件夹1<br>———xxx.jpg<br>. . . . . .<br>——文件夹29<br>———xxx.jpg<br><strong>create_tfrecords.py</strong></p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">creat_tf</span><span class="params">(imgpath)</span>:</span></span><br><span class="line"> </span><br><span class="line">    cwd = os.getcwd()</span><br><span class="line">    classes = os.listdir(cwd + imgpath)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 此处定义tfrecords文件存放</span></span><br><span class="line">    writer = tf.python_io.TFRecordWriter(<span class="string">"train.tfrecords"</span>)</span><br><span class="line">    <span class="keyword">for</span> index, name <span class="keyword">in</span> enumerate(classes):</span><br><span class="line">        class_path = cwd + imgpath + name + <span class="string">"/"</span></span><br><span class="line">        print(class_path)</span><br><span class="line">        <span class="keyword">if</span> os.path.isdir(class_path):</span><br><span class="line">            <span class="keyword">for</span> img_name <span class="keyword">in</span> os.listdir(class_path):</span><br><span class="line">                img_path = class_path + img_name</span><br><span class="line">                img = Image.open(img_path)</span><br><span class="line">                img = img.resize((<span class="number">224</span>, <span class="number">224</span>))</span><br><span class="line">                img_raw = img.tobytes()             </span><br><span class="line">                example = tf.train.Example(features=tf.train.Features(feature=&#123;</span><br><span class="line">                <span class="string">'label'</span>: tf.train.Feature(int64_list=tf.train.Int64List(value=[int(name)])),</span><br><span class="line">                <span class="string">'img_raw'</span>: tf.train.Feature(bytes_list=tf.train.BytesList(value=[img_raw]))</span><br><span class="line">            &#125;))</span><br><span class="line">                writer.write(example.SerializeToString())  </span><br><span class="line">                print(img_name)</span><br><span class="line">    writer.close()</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_example</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment">#简单的读取例子：</span></span><br><span class="line">    <span class="keyword">for</span> serialized_example <span class="keyword">in</span> tf.python_io.tf_record_iterator(<span class="string">"train.tfrecords"</span>):</span><br><span class="line">        example = tf.train.Example()</span><br><span class="line">        example.ParseFromString(serialized_example)</span><br><span class="line">    </span><br><span class="line">        <span class="comment">#image = example.features.feature['img_raw'].bytes_list.value</span></span><br><span class="line">        label = example.features.feature[<span class="string">'label'</span>].int64_list.value</span><br><span class="line">        <span class="comment"># 可以做一些预处理之类的</span></span><br><span class="line">        <span class="comment"># print(label)</span></span><br><span class="line"></span><br><span class="line"> </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    imgpath = <span class="string">'./img/'</span></span><br><span class="line">    creat_tf(imgpath)</span><br><span class="line">    <span class="comment">#read_example()</span></span><br></pre></td></tr></table></figure>
 
@@ -249,232 +260,64 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf </span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np </span><br><span class="line"><span class="keyword">import</span> pdb</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> VGG16 <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="comment">#import matplotlib.pyplot as plt</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test</span><span class="params">(path)</span>:</span></span><br><span class="line"> </span><br><span class="line">    x = tf.placeholder(dtype=tf.float32, shape=[<span class="literal">None</span>, <span class="number">224</span>, <span class="number">224</span>, <span class="number">3</span>], name=<span class="string">'input'</span>)</span><br><span class="line">    keep_prob = tf.placeholder(tf.float32)</span><br><span class="line">    <span class="comment"># 注意更改自己的类别数，此处输出为29类</span></span><br><span class="line">    output = VGG16(x, keep_prob, <span class="number">29</span>)</span><br><span class="line">    score = tf.nn.softmax(output)</span><br><span class="line">	<span class="comment"># 返回每一行最大置信度所在的索引数组</span></span><br><span class="line">    f_cls = tf.argmax(score, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    sess = tf.InteractiveSession()</span><br><span class="line">    sess.run(tf.global_variables_initializer())</span><br><span class="line">    saver = tf.train.Saver()</span><br><span class="line">    <span class="comment"># 训练好的模型位置</span></span><br><span class="line">    saver.restore(sess, <span class="string">'./model/model.ckpt-3000'</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(path):</span><br><span class="line">        imgpath = os.path.join(path, i)</span><br><span class="line">        im = cv2.imread(imgpath)</span><br><span class="line">        im = cv2.resize(im, (<span class="number">224</span> , <span class="number">224</span>))<span class="comment"># * (1. / 255)</span></span><br><span class="line"> </span><br><span class="line">        im = np.expand_dims(im, axis=<span class="number">0</span>)</span><br><span class="line">        <span class="comment"># 测试时，keep_prob设置为1.0</span></span><br><span class="line">        pred, _score = sess.run([f_cls, score], feed_dict=&#123;x:im, keep_prob:<span class="number">1.0</span>&#125;)</span><br><span class="line">        prob = round(np.max(_score), <span class="number">4</span>)</span><br><span class="line">		<span class="comment"># 打印测试图片所属类别的索引号和置信度</span></span><br><span class="line">        print(<span class="string">"&#123;&#125; rubbing class is: &#123;&#125;, score: &#123;&#125;"</span>.format(i, int(pred), prob))</span><br><span class="line">        <span class="comment"># plt.imshow(im)</span></span><br><span class="line">        <span class="comment"># plt.imshow(im1)</span></span><br><span class="line">        <span class="comment"># plt.title(u'预测值:%i' % pred)</span></span><br><span class="line">        <span class="comment"># plt.show() </span></span><br><span class="line">    sess.close()</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># 测试图片保存在文件夹中了，图片前面数字为所属类别</span></span><br><span class="line">    path = <span class="string">'./test_img'</span></span><br><span class="line">    test(path)</span><br></pre></td></tr></table></figure>
 <p>以下是测试效果：<br><img src="https://img-blog.csdnimg.cn/20190816102311170.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70" alt=""><br>左边是测试图片，右边是测试结果。由于数据集规模小且训练时间段短，最终测试的效果不是很好，有个别字符的分类识别效果较差。</p>
 
-      
     </div>
 
     
     
     
+
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+      
+
+      
+        
+      
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
         
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/24/a/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/author.jpg">
-      <meta itemprop="name" content="Bruce">
-      <meta itemprop="description" content="if you want to take credit, first learn to take reponsibility.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="北叹荒歌">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/24/a/" class="post-title-link" itemprop="url">a</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-24 13:54:05 / 修改时间：13:55:26" itemprop="dateCreated datePublished" datetime="2020-03-24T13:54:05+08:00">2020-03-24</time>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-users"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="firestore-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>some context</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
         
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/24/README/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/author.jpg">
-      <meta itemprop="name" content="Bruce">
-      <meta itemprop="description" content="if you want to take credit, first learn to take reponsibility.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="北叹荒歌">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/24/README/" class="post-title-link" itemprop="url">README</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-24 12:52:59 / 修改时间：12:53:29" itemprop="dateCreated datePublished" datetime="2020-03-24T12:52:59+08:00">2020-03-24</time>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-users"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="firestore-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/24/a/" rel="prev" title="a">
+      <i class="fa fa-chevron-left"></i> a
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/22/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/author.jpg">
-      <meta itemprop="name" content="Bruce">
-      <meta itemprop="description" content="if you want to take credit, first learn to take reponsibility.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="北叹荒歌">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/22/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-22 15:51:35" itemprop="dateCreated datePublished" datetime="2020-03-22T15:51:35+08:00">2020-03-22</time>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-users"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="firestore-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
   </article>
   
   
   
 
   </div>
-
-  
-
 
 
           </div>
@@ -525,6 +368,7 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#具体步骤"><span class="nav-number">1.</span> <span class="nav-text">具体步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-数据处理"><span class="nav-number">1.1.</span> <span class="nav-text">1.数据处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-加载模型及调试训练"><span class="nav-number">1.2.</span> <span class="nav-text">2.加载模型及调试训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-测试评估"><span class="nav-number">1.3.</span> <span class="nav-text">3.测试评估</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
