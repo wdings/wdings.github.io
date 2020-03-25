@@ -131,7 +131,7 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">4</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档<span class="badge">3</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -186,6 +186,93 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
             
 
   <div class="posts-expand">
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/25/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E2%80%94%E2%80%94SSD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/author.jpg">
+      <meta itemprop="name" content="Bruce">
+      <meta itemprop="description" content="if you want to take credit, first learn to take reponsibility.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="北叹荒歌">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/03/25/%E7%9B%AE%E6%A0%87%E6%A3%80%E6%B5%8B%E2%80%94%E2%80%94SSD/" class="post-title-link" itemprop="url">目标检测——SSD</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-03-25 15:27:25 / 修改时间：15:27:32" itemprop="dateCreated datePublished" datetime="2020-03-25T15:27:25+08:00">2020-03-25</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-users"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="firestore-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><em>SSD借鉴了yolov1的one-stage思想，直接用一个神经网络对bbox进行目标分类和回归定位，同时也引入了Faster RCNN中的anchor机制来提升精度。</em><br><strong>那么，针对yolov1精度低、定位不准、小目标检测差的问题，SSD做了哪些改进？</strong></p>
+<h1 id="一-Model"><a href="#一-Model" class="headerlink" title="一 Model"></a>一 Model</h1><p><strong>创新点</strong></p>
+<h2 id="1-多尺度特转图预测"><a href="#1-多尺度特转图预测" class="headerlink" title="1.多尺度特转图预测"></a>1.多尺度特转图预测</h2><p>因为不同size的feature map的感受野不同，可以检测不同大小的目标。较大的map，感受野小，适合检测相对较小的目标；较小的map，感受野大，适合检测相对较大的目标。（<em>anchor的设计正是依据感受野</em>）</p>
+<p>在SSD中，比如一个8x8的map（如图）可以划分为更多的单元格，每个grid的anchor尺度较小，更适合检测小目标。（此处也表明了为什么map较大的，感受野较小）<br><img src="https://img-blog.csdnimg.cn/20200324214700442.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>而在4x4的map中，划分的单元格较少，每个grid的anchor尺度较大，更适合检测大目标。其中，anchor的设计要求，在初始标注ground truth时，需将gt的尺寸规格赋予map中一系列固定输出的bboxes中。</p>
+<p><strong><em>多尺度预测使得SSD相比于yolov1对小目标的检测更稳定，但是SSD本身对小目标的检测还是存在天然缺陷。为什么？</em></strong></p>
+<ul>
+<li>主要原因有以下2点：<br>（1）==SSD对底层特征利用不充分；==<br>SSD是一种全卷积的检测器，用不同层检测不同大小的目标，但是这中间存在一个矛盾点——<strong><em>底层map较大，分辨率更高，但语义信息不够丰富；深层的语义信息够了，但经过多次的pooling之后，map又太小了。</em></strong>  而检测小目标，既需要一张足够大的map来提供精细的特征和更加密集的采样，同时也需要足够的语义信息来与背景区分开。而在SSD中，负责检测小目标的底层特征语义信息不够丰富，之后又变得较小，其位置信息有较大的损失，导致之后对小目标的检测和回归无法满足要求。<br>（2）==对anchor的设置不是很合理。==<br>原因1所说的矛盾，如果卷积足够深，影响其实也没那么大。但在SSD中，作者设置检测小目标的anchor为0.2，对于一张720p的image，其最小检测尺寸就有144个像素，还是太大了。对于这一点，可以在相应特征层中生成不同尺度的anchor，基本能覆盖足够小的目标就可以，但此时anchor的数量就会增加，速度会降低。<h2 id="2-采用卷积方式预测"><a href="#2-采用卷积方式预测" class="headerlink" title="2.采用卷积方式预测"></a>2.采用卷积方式预测</h2>yolov1最后采用FC层预测，SSD则是将6个不同尺度的map分别输入到两个3x3的卷积中进行结果预测，这样可以适用于各种size的image。</li>
+</ul>
+<p>基础网络采用VGG作为backbone：<br><img src="https://img-blog.csdnimg.cn/20200325121547520.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>该架构中需要<strong>注意</strong>的几点：</p>
+<ul>
+<li>将原来的FC6、FC7分别转换为3x3、1x1的卷积，并使用FC6、FC7的参数初始化卷积层。</li>
+<li>将VGG中stride=2的2x2 pool5变换成stride=1的3x3 pool。</li>
+<li>转换后的conv6的卷积采用的是dilation_rate=6的空洞卷积，用于弥补感受野。</li>
+</ul>
+<p>最终的检测，SSD是将6个feature map分别输入到两个3x3的卷积操作中，classifier的卷积输出维度为：anchor_num  x  21.<br>regressor的卷积输出维度为：anchor_num  x  4.</p>
+<h2 id="3-Anchor的设计"><a href="#3-Anchor的设计" class="headerlink" title="3.Anchor的设计"></a>3.Anchor的设计</h2><p>以feature map上每个点的中心点来生成一系列同心的default boxes（然后，中心点的坐标会乘以step，相当于从map位置映射回原图位置）。使用6个不同大小的map来做预测，最低层的map的scale位置为S<em>min</em>=0.2，最高层的为S<em>max</em>=0.95，其它层通过以下公式进行设计：<br><img src="https://img-blog.csdnimg.cn/2020032512382190.png" alt="在这里插入图片描述"><br>使用不同的ratio值，a<em>r</em>包括[1, 2, 3, 1/2, 1/3]，通过下面的公式计算 default box 的宽度w和高度h：<br><img src="https://img-blog.csdnimg.cn/20200325124552217.png" alt="在这里插入图片描述"><br>另外，每个格子还预测两个正方形default box为：<br><img src="https://img-blog.csdnimg.cn/20200325124701854.png" alt="在这里插入图片描述"><br>所以预测的6个框为：<br><img src="https://img-blog.csdnimg.cn/20200325124741685.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h1 id="二-Training"><a href="#二-Training" class="headerlink" title="二 Training"></a>二 Training</h1><h2 id="1-Default-boxes匹配策略"><a href="#1-Default-boxes匹配策略" class="headerlink" title="1.Default boxes匹配策略"></a>1.Default boxes匹配策略</h2><p>在training时，需要将每个anchor与gt匹配，与gt匹配的anchor所对应的box负责预测目标。</p>
+<p>在yolov1中，gt的中心落在哪个grid，该grid中与gt IoU最大的box负责预测，但在SSD中，SSD的anchor与gt的匹配策略原则主要有以下2点：<br>（1）对于每个gt，找到与其IoU最大的default box与其匹配，相匹配的anchor为正样本，反之为负样本。但是gt很少，anchor却很多，仅仅按照这一原则匹配，很多anchor会被划分为负样本，导致正负样本不平衡，所以还需要第二个原则；<br>（2）对于剩余的anchor，若与某个gt的IoU&gt;0.5，那么该anchor也与这个gt匹配。这意味着gt可能与多个anchor匹配，这是可以的。但反过来则不行，一个anchor只能匹配一个gt。如果多个gt与某个anchor的IoU都大于0.5，那么anchor只与IoU最大的那个gt匹配。</p>
+<h2 id="2-难负例挖掘-amp-数据增强"><a href="#2-难负例挖掘-amp-数据增强" class="headerlink" title="2.难负例挖掘&amp;数据增强"></a>2.难负例挖掘&amp;数据增强</h2><p>尽管一个gt可与多个anchor匹配，但是gt相对于anchor还是太少，所以负样本相比于正样本会很多。为保证正负样本平衡，SSD采用hard negative mining，对负样本抽样，按照置信度误差进行降序排列，选取置信度误差较大（预测背景的confidence越小，误差越大）的top-k作为训练的负样本。</p>
+<p>SSD中，数据增强主要采用的技术有水平翻转、随机crop+颜色扭曲、随机采集块域等。</p>
+<h2 id="3-损失函数"><a href="#3-损失函数" class="headerlink" title="3.损失函数"></a>3.损失函数</h2><p>SSD训练的目标函数源于Multi Box的目标函数，SSD对其进行了扩展，使其可以处理多个目标类别。</p>
+<p>loss分为两部分：置信度误差（confidence loss）+位置误差（localization loss）。<br><img src="https://img-blog.csdnimg.cn/20200325152121341.png" alt="在这里插入图片描述"><br>其中置信度误差采用的是softmax loss：<br><img src="https://img-blog.csdnimg.cn/2020032515245684.png" alt="在这里插入图片描述"><br>位置误差采用的是smooth L1 loss：<br><img src="https://img-blog.csdnimg.cn/20200325152258638.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
         
   
   
@@ -249,137 +336,6 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf </span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np </span><br><span class="line"><span class="keyword">import</span> pdb</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">from</span> VGG16 <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> cv2</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="comment">#import matplotlib.pyplot as plt</span></span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test</span><span class="params">(path)</span>:</span></span><br><span class="line"> </span><br><span class="line">    x = tf.placeholder(dtype=tf.float32, shape=[<span class="literal">None</span>, <span class="number">224</span>, <span class="number">224</span>, <span class="number">3</span>], name=<span class="string">'input'</span>)</span><br><span class="line">    keep_prob = tf.placeholder(tf.float32)</span><br><span class="line">    <span class="comment"># 注意更改自己的类别数，此处输出为29类</span></span><br><span class="line">    output = VGG16(x, keep_prob, <span class="number">29</span>)</span><br><span class="line">    score = tf.nn.softmax(output)</span><br><span class="line">	<span class="comment"># 返回每一行最大置信度所在的索引数组</span></span><br><span class="line">    f_cls = tf.argmax(score, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    sess = tf.InteractiveSession()</span><br><span class="line">    sess.run(tf.global_variables_initializer())</span><br><span class="line">    saver = tf.train.Saver()</span><br><span class="line">    <span class="comment"># 训练好的模型位置</span></span><br><span class="line">    saver.restore(sess, <span class="string">'./model/model.ckpt-3000'</span>)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> os.listdir(path):</span><br><span class="line">        imgpath = os.path.join(path, i)</span><br><span class="line">        im = cv2.imread(imgpath)</span><br><span class="line">        im = cv2.resize(im, (<span class="number">224</span> , <span class="number">224</span>))<span class="comment"># * (1. / 255)</span></span><br><span class="line"> </span><br><span class="line">        im = np.expand_dims(im, axis=<span class="number">0</span>)</span><br><span class="line">        <span class="comment"># 测试时，keep_prob设置为1.0</span></span><br><span class="line">        pred, _score = sess.run([f_cls, score], feed_dict=&#123;x:im, keep_prob:<span class="number">1.0</span>&#125;)</span><br><span class="line">        prob = round(np.max(_score), <span class="number">4</span>)</span><br><span class="line">		<span class="comment"># 打印测试图片所属类别的索引号和置信度</span></span><br><span class="line">        print(<span class="string">"&#123;&#125; rubbing class is: &#123;&#125;, score: &#123;&#125;"</span>.format(i, int(pred), prob))</span><br><span class="line">        <span class="comment"># plt.imshow(im)</span></span><br><span class="line">        <span class="comment"># plt.imshow(im1)</span></span><br><span class="line">        <span class="comment"># plt.title(u'预测值:%i' % pred)</span></span><br><span class="line">        <span class="comment"># plt.show() </span></span><br><span class="line">    sess.close()</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># 测试图片保存在文件夹中了，图片前面数字为所属类别</span></span><br><span class="line">    path = <span class="string">'./test_img'</span></span><br><span class="line">    test(path)</span><br></pre></td></tr></table></figure>
 <p>以下是测试效果：<br><img src="https://img-blog.csdnimg.cn/20190816102311170.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dhbmdkczAwMA==,size_16,color_FFFFFF,t_70" alt=""><br>左边是测试图片，右边是测试结果。由于数据集规模小且训练时间段短，最终测试的效果不是很好，有个别字符的分类识别效果较差。</p>
 
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/24/a/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/author.jpg">
-      <meta itemprop="name" content="Bruce">
-      <meta itemprop="description" content="if you want to take credit, first learn to take reponsibility.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="北叹荒歌">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/24/a/" class="post-title-link" itemprop="url">a</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-24 13:54:05 / 修改时间：13:55:26" itemprop="dateCreated datePublished" datetime="2020-03-24T13:54:05+08:00">2020-03-24</time>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-users"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="firestore-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>some context</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/24/README/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/author.jpg">
-      <meta itemprop="name" content="Bruce">
-      <meta itemprop="description" content="if you want to take credit, first learn to take reponsibility.">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="北叹荒歌">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/24/README/" class="post-title-link" itemprop="url">README</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-03-24 12:52:59 / 修改时间：12:53:29" itemprop="dateCreated datePublished" datetime="2020-03-24T12:52:59+08:00">2020-03-24</time>
-            </span>
-
-          
-            <span class="post-meta-item" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-users"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="firestore-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          
       
     </div>
 
@@ -540,7 +496,7 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -600,7 +556,7 @@ color="0,0,255" opacity='0.7' zIndex="-2" count="100" src="//cdn.bootcss.com/can
 
 <div class="theme-info">
   <div class="powered-by"></div>
-  <span class="post-count">博客全站共1.9k字</span>
+  <span class="post-count">博客全站共3.4k字</span>
 </div>
 
         
